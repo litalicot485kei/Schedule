@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>1日のスケジュール報告 自動作成ツール</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6f4ee;
+    --panel:#ffffff;
+    --ink:#262521;
+    --ink-soft:#6b675f;
+    --navy:#2f3b4c;
+    --navy-soft:#4a5875;
+    --teal:#5c7d6f;
+    --teal-soft:#e4ede8;
+    --line:#d8d3c6;
+    --gold:#b08d4f;
+    --danger:#a6503a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Noto Sans JP', sans-serif;
+    padding:32px 20px 80px;
+    line-height:1.7;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+
+  /* ---------- Header ---------- */
+  .masthead{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-bottom:3px double var(--navy);
+    padding-bottom:14px;
+    margin-bottom:28px;
+  }
+  .masthead h1{
+    font-family:'Shippori Mincho', serif;
+    font-weight:700;
+    font-size:26px;
+    letter-spacing:.04em;
+    color:var(--navy);
+    margin:0;
+  }
+  .masthead .sub{
+    font-size:12px;
+    color:var(--ink-soft);
+    letter-spacing:.08em;
+  }
+
+  /* ---------- Control panel ---------- */
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:26px 28px;
+    margin-bottom:32px;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .panel h2{
+    font-family:'Shippori Mincho', serif;
+    font-size:16px;
+    color:var(--navy);
+    margin:0 0 4px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .panel h2 .num{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:20px;height:20px;
+    border-radius:50%;
+    background:var(--navy);
+    color:#fff;
+    font-size:11px;
+    font-family:'Noto Sans JP',sans-serif;
+  }
+  .field-help{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin:0 0 14px;
+  }
+  .section-block{
+    padding:18px 0;
+    border-top:1px solid var(--line);
+  }
+  .section-block:first-of-type{border-top:none;padding-top:6px;}
+
+  label.text-label{
+    display:block;
+    font-size:13px;
+    font-weight:500;
+    color:var(--navy-soft);
+    margin-bottom:6px;
+  }
+  input[type=text], textarea, input[type=date]{
+    width:100%;
+    font-family:'Noto Sans JP',sans-serif;
+    font-size:14px;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:#fdfcfa;
+    color:var(--ink);
+  }
+  input[type=text]:focus, textarea:focus, input[type=date]:focus{
+    outline:none;
+    border-color:var(--teal);
+    box-shadow:0 0 0 3px var(--teal-soft);
+  }
+  textarea{resize:vertical;min-height:44px;}
+
+  .manner-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px 18px;
+  }
+  .manner-item{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:#fdfcfa;
+    cursor:pointer;
+    transition:border-color .15s, background .15s;
+    font-size:13.5px;
+  }
+  .manner-item:hover{border-color:var(--teal);}
+  .manner-item.checked{
+    border-color:var(--teal);
+    background:var(--teal-soft);
+  }
+  .manner-item input{margin-top:2px;accent-color:var(--teal);flex-shrink:0;}
+  .manner-item .mnum{font-weight:700;color:var(--navy);}
+
+  .day-grid{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:10px;
+  }
+  .day-card{
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:10px 8px 12px;
+    text-align:center;
+    background:#fdfcfa;
+    cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .day-card.on{border-color:var(--navy);background:var(--teal-soft);}
+  .day-card .dname{font-weight:700;font-size:15px;color:var(--navy);}
+  .day-card input{accent-color:var(--navy);margin:6px 0 8px;}
+  .day-card .type-badge{
+    font-size:11px;
+    padding:4px 2px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:#fff;
+    color:var(--ink-soft);
+  }
+  .day-card.off .type-badge, .day-card.off .dname{opacity:.35;}
+
+  .btn-row{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;}
+  button{
+    font-family:'Noto Sans JP',sans-serif;
+    font-size:14px;
+    font-weight:500;
+    padding:12px 26px;
+    border-radius:3px;
+    border:none;
+    cursor:pointer;
+    letter-spacing:.03em;
+  }
+  .btn-primary{background:var(--navy);color:#fff;}
+  .btn-primary:hover{background:var(--navy-soft);}
+  .btn-secondary{background:#fff;color:var(--navy);border:1px solid var(--navy);}
+  .btn-secondary:hover{background:var(--teal-soft);}
+
+  /* ---------- Output ---------- */
+  #output{margin-top:8px;}
+  .day-sheet{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:30px 34px 26px;
+    margin-bottom:28px;
+    position:relative;
+  }
+  .sheet-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    border-bottom:2px solid var(--navy);
+    padding-bottom:10px;
+    margin-bottom:16px;
+  }
+  .sheet-head h3{
+    font-family:'Shippori Mincho', serif;
+    font-size:20px;
+    color:var(--navy);
+    margin:0;
+  }
+  .sheet-head .date-line{
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .manner-box{
+    border:1px solid var(--gold);
+    background:#fbf6ea;
+    border-radius:3px;
+    padding:10px 14px;
+    margin-bottom:16px;
+    font-size:13px;
+  }
+  .manner-box .mb-title{
+    font-weight:700;
+    color:var(--gold);
+    font-size:11.5px;
+    letter-spacing:.06em;
+    margin-bottom:4px;
+  }
+  table.sched{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  table.sched th{
+    background:var(--navy);
+    color:#fff;
+    font-weight:500;
+    font-size:12px;
+    padding:7px 8px;
+    text-align:left;
+  }
+  table.sched th.time-col, table.sched td.time-col{width:64px;text-align:center;}
+  table.sched th.sign-col, table.sched td.sign-col{width:110px;text-align:center;}
+  table.sched td{
+    border-bottom:1px solid var(--line);
+    padding:9px 8px;
+    vertical-align:top;
+  }
+  tr.note-row td{
+    background:#f4f2ec;
+    font-size:12px;
+    color:var(--ink-soft);
+    padding:6px 8px 6px 30px;
+  }
+  tr.goal-row td{
+    background:#fff;
+    padding:10px 8px 10px 30px;
+  }
+  .goal-line{
+    font-size:12.5px;
+    color:var(--ink);
+  }
+  .goal-line .lbl{color:var(--navy-soft);font-weight:500;}
+  .goal-blank{
+    display:inline-block;
+    min-width:340px;
+    border-bottom:1px dotted var(--ink-soft);
+    padding:0 4px 1px;
+  }
+  .session-label{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    color:#fff;
+    background:var(--teal);
+    padding:1px 8px;
+    border-radius:10px;
+    margin-right:6px;
+  }
+  .sign-box{
+    display:inline-block;
+    width:90%;
+    height:24px;
+    border:1px solid var(--line);
+    border-radius:2px;
+    background:#fdfcfa;
+  }
+  .phrases{
+    margin-top:18px;
+    border-top:1px dashed var(--line);
+    padding-top:12px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+  }
+  .phrases .ph-title{font-weight:700;color:var(--navy-soft);margin-bottom:4px;}
+  .phrases ul{margin:0;padding-left:18px;}
+  .phrases li{margin-bottom:2px;}
+
+  .empty-msg{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13px;
+    padding:40px 0;
+  }
+
+  /* ---------- Print ---------- */
+  @media print{
+    body{background:#fff;padding:0;}
+    .panel, .btn-row, .masthead .sub, .no-print{display:none !important;}
+    .masthead{border-bottom:2px solid #000;margin-bottom:10px;}
+    .day-sheet{
+      border:none;
+      box-shadow:none;
+      padding:8mm 6mm;
+      page-break-after:always;
+      margin:0;
+    }
+    .day-sheet:last-child{page-break-after:auto;}
+    table.sched th{background:#333 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .manner-box{background:#fbf6ea !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    tr.note-row td{background:#f4f2ec !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .session-label{background:var(--teal) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <h1>1日のスケジュール報告 自動作成ツール</h1>
+    <div class="sub">入力 → 自動生成 → 印刷</div>
+  </div>
+
+  <div class="panel no-print">
+
+    <div class="section-block">
+      <h2><span class="num">1</span>基本情報</h2>
+      <p class="field-help">お名前と、今日の日付（任意）を入力してください。</p>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;">
+          <label class="text-label">お名前</label>
+          <input type="text" id="userName" placeholder="例）山田 太郎" value="">
+        </div>
+        <div style="flex:1;min-width:200px;">
+          <label class="text-label">日付（任意）</label>
+          <input type="date" id="todayDate" onchange="autoSetDayFromDate()">
+          <div id="autoDayNote" style="font-size:11.5px;color:var(--teal);margin-top:4px;height:14px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h2><span class="num">2</span>今日の曜日</h2>
+      <p class="field-help">今日の曜日を1つ選んでください。区分（フルタイム／午前のみ）は自動で決まります。<br>月・火・木＝フルタイム／水・金・土＝午前のみ</p>
+      <div class="day-grid" id="dayGrid"></div>
+    </div>
+
+    <div class="section-block">
+      <h2><span class="num">3</span>今日のビジネスマナーの小技の目標</h2>
+      <p class="field-help">実践する番号を選んでください（複数選択可）。</p>
+      <div class="manner-grid" id="mannerGrid"></div>
+    </div>
+
+    <div class="section-block">
+      <h2><span class="num">4</span>取り組み目標</h2>
+      <p class="field-help" id="goalHelp">「取り組み：プログラムもしくは個別訓練（　　）」の（　）内に入る目標を書いてください。</p>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:220px;">
+          <label class="text-label" id="goalLabelAM">午前の取り組み目標</label>
+          <textarea id="goalTextAM" placeholder="例）データ入力の練習を集中して行う"></textarea>
+        </div>
+        <div style="flex:1;min-width:220px;" id="goalPMWrap">
+          <label class="text-label">午後の取り組み目標</label>
+          <textarea id="goalTextPM" placeholder="例）書類整理の練習を行う"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" onclick="generate()">スケジュール表を作成する</button>
+      <button class="btn-secondary" onclick="doPrint()">印刷する</button>
+    </div>
+  </div>
+
+  <div id="output">
+    <div class="empty-msg">上のフォームを入力して「スケジュール表を作成する」を押してください。</div>
+  </div>
+
+  <div class="no-print" style="text-align:center;margin-top:20px;">
+    <button class="btn-secondary" onclick="doPrint()">🖨 印刷する</button>
+  </div>
+
+</div>
+
+<script>
+const MANNER_ITEMS = [
+  {n:"①", t:"上を見よう"},
+  {n:"②", t:"相槌"},
+  {n:"③", t:"相手の時間をもらった時にもお礼をいう"},
+  {n:"④", t:"部屋をまたぐときに失礼します"},
+  {n:"⑤", t:"姿勢をただす"},
+];
+
+const DAYS = [
+  {key:"mon", name:"月", type:"full"},
+  {key:"tue", name:"火", type:"full"},
+  {key:"wed", name:"水", type:"am"},
+  {key:"thu", name:"木", type:"full"},
+  {key:"fri", name:"金", type:"am"},
+  {key:"sat", name:"土", type:"am"},
+];
+let selectedDay = 0; // index into DAYS, default = 月
+
+const REPORT_PHRASES = [
+  "「今日の取り組み予定は○○、ビジネスマナーの小技目標は●●です」",
+  "「●●の作業が完了しました。確認お願いいたします。」",
+  "「ただいまお時間よろしいでしょうか。作業が終わりましたので確認お願いします」",
+  "「ただいまお時間よろしいでしょうか。午前中の取り組みについて報告します」",
+];
+
+function fullDaySchedule(goalAMHtml, goalPMHtml){
+  return `
+  <tr><td class="time-col">10:00</td><td colspan="1">朝礼・スパーク・清掃</td><td class="sign-col"></td></tr>
+  <tr class="note-row"><td></td><td colspan="2">目標設定時間　⇒スタッフに取り組み内容とビジネスマナー目標を報告して、確認をしてもらう</td></tr>
+  <tr class="goal-row"><td></td><td colspan="2">
+    <span class="session-label">午前</span>
+    <span class="goal-line"><span class="lbl">取り組み：</span>プログラムもしくは個別訓練　（<span class="goal-blank">${goalAMHtml}</span>）</span>
+  </td></tr>
+  <tr><td class="time-col">11:30</td><td>スタッフに取り組みを報告して完了サインをもらう</td><td class="sign-col"><span class="sign-box"></span></td></tr>
+  <tr><td class="time-col">11:40</td><td>日報を書く</td><td class="sign-col"></td></tr>
+  <tr><td class="time-col">11:50</td><td>午前終礼</td><td class="sign-col"></td></tr>
+  <tr><td class="time-col">13:00</td><td>昼礼</td><td class="sign-col"></td></tr>
+  <tr class="note-row"><td></td><td colspan="2">目標設定時間　⇒スタッフに取り組み内容とビジネスマナー目標を報告して、確認をしてもらう</td></tr>
+  <tr class="goal-row"><td></td><td colspan="2">
+    <span class="session-label">午後</span>
+    <span class="goal-line"><span class="lbl">取り組み：</span>プログラムもしくは個別訓練　（<span class="goal-blank">${goalPMHtml}</span>）</span>
+  </td></tr>
+  <tr><td class="time-col">14:20</td><td>スタッフに取り組みを報告して完了サインをもらう</td><td class="sign-col"><span class="sign-box"></span></td></tr>
+  <tr><td class="time-col">14:30</td><td>日報記載・振り返り</td><td class="sign-col"></td></tr>
+  <tr><td class="time-col">14:50</td><td>終礼</td><td class="sign-col"></td></tr>
+  `;
+}
+
+function amOnlySchedule(goalHtml){
+  return `
+  <tr><td class="time-col">10:00</td><td>朝礼・スパーク・清掃</td><td class="sign-col"></td></tr>
+  <tr class="note-row"><td></td><td colspan="2">目標設定時間　⇒スタッフに取り組み内容とビジネスマナー目標を報告して、確認をしてもらう</td></tr>
+  <tr class="goal-row"><td></td><td colspan="2">
+    <span class="session-label">午前</span>
+    <span class="goal-line"><span class="lbl">取り組み：</span>プログラムもしくは個別訓練　（<span class="goal-blank">${goalHtml}</span>）</span>
+  </td></tr>
+  <tr><td class="time-col">11:20</td><td>スタッフに取り組みを報告して完了サインをもらう</td><td class="sign-col"><span class="sign-box"></span></td></tr>
+  <tr><td class="time-col">11:30</td><td>日報を書く⇒シェアタイム</td><td class="sign-col"></td></tr>
+  <tr><td class="time-col">11:50</td><td>午前終礼</td><td class="sign-col"></td></tr>
+  `;
+}
+
+function buildMannerGrid(){
+  const grid = document.getElementById("mannerGrid");
+  grid.innerHTML = MANNER_ITEMS.map((m,i)=>`
+    <label class="manner-item" id="mitem_${i}">
+      <input type="checkbox" data-idx="${i}" onchange="toggleManner(${i})">
+      <span><span class="mnum">${m.n}</span> ${m.t}</span>
+    </label>
+  `).join("");
+}
+function toggleManner(i){
+  document.getElementById("mitem_"+i).classList.toggle("checked");
+}
+
+function buildDayGrid(){
+  const grid = document.getElementById("dayGrid");
+  grid.innerHTML = DAYS.map((d,i)=>`
+    <div class="day-card ${i===selectedDay?'on':'off'}" id="dcard_${i}" onclick="manualSelectDay(${i})">
+      <div class="dname">${d.name}</div>
+      <input type="radio" name="dayRadio" ${i===selectedDay?'checked':''} onclick="event.stopPropagation(); manualSelectDay(${i})">
+      <div class="type-badge">${d.type==='full'?'フルタイム':'午前のみ'}</div>
+    </div>
+  `).join("");
+  updateGoalFields();
+}
+function manualSelectDay(i){
+  const note = document.getElementById("autoDayNote");
+  if(note) note.textContent = "";
+  selectDay(i);
+}
+function selectDay(i){
+  selectedDay = i;
+  buildDayGrid();
+}
+function autoSetDayFromDate(){
+  const val = document.getElementById("todayDate").value;
+  const note = document.getElementById("autoDayNote");
+  if(!val){ note.textContent = ""; return; }
+  const dt = new Date(val+"T00:00:00");
+  const dow = dt.getDay(); // 0=日,1=月,...6=土
+  const map = {1:0, 2:1, 3:2, 4:3, 5:4, 6:5};
+  if(dow === 0){
+    note.textContent = "日曜日は対象外です。曜日を手動で選んでください。";
+    note.style.color = "var(--danger)";
+    return;
+  }
+  note.style.color = "var(--teal)";
+  note.textContent = `${DAYS[map[dow]].name}曜日と判定しました`;
+  selectDay(map[dow]);
+}
+function updateGoalFields(){
+  const isFull = DAYS[selectedDay].type === "full";
+  document.getElementById("goalPMWrap").style.display = isFull ? "" : "none";
+  document.getElementById("goalLabelAM").textContent = isFull ? "午前の取り組み目標" : "取り組み目標";
+  document.getElementById("goalHelp").innerHTML = isFull
+    ? "「取り組み：プログラムもしくは個別訓練（　　）」の（　）内に入る目標を書いてください。フルタイムなので午前・午後の2つを設定します。"
+    : "「取り組み：プログラムもしくは個別訓練（　　）」の（　）内に入る目標を書いてください。午前のみなので1つだけ設定します。";
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function generate(){
+  const name = document.getElementById("userName").value.trim() || "○○";
+  const d = DAYS[selectedDay];
+  const isFull = d.type === "full";
+
+  const goalAM = document.getElementById("goalTextAM").value.trim();
+  const goalPM = document.getElementById("goalTextPM").value.trim();
+  const goalAMHtml = goalAM ? escapeHtml(goalAM) : "&nbsp;";
+  const goalPMHtml = goalPM ? escapeHtml(goalPM) : "&nbsp;";
+
+  const selectedManner = MANNER_ITEMS
+    .map((m,i)=>({...m, checked: document.querySelector(`#mitem_${i} input`).checked}))
+    .filter(m=>m.checked);
+
+  const mannerHtml = selectedManner.length
+    ? selectedManner.map(m=>`<span style="font-weight:700;color:var(--navy);">${m.n}</span> ${m.t}`).join("　／　")
+    : "（未選択）";
+
+  const dateVal = document.getElementById("todayDate").value;
+  let dateLine;
+  if(dateVal){
+    const dt = new Date(dateVal+"T00:00:00");
+    dateLine = `${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日（${d.name}）`;
+  } else {
+    dateLine = `　　年　　月　　日（${d.name}）`;
+  }
+
+  const bodyRows = isFull ? fullDaySchedule(goalAMHtml, goalPMHtml) : amOnlySchedule(goalAMHtml);
+  const timeCols = `<th class="time-col">時刻</th><th>内容</th><th class="sign-col">スタッフサイン</th>`;
+
+  const output = document.getElementById("output");
+  output.innerHTML = `
+    <div class="day-sheet">
+      <div class="sheet-head">
+        <h3>${escapeHtml(name)}さんの時間割（${d.name}曜日・${isFull?'フルタイム':'午前のみ'}）</h3>
+        <div class="date-line">${dateLine}</div>
+      </div>
+      <div class="manner-box">
+        <div class="mb-title">今日のビジネスマナーの小技の目標</div>
+        ${mannerHtml}
+      </div>
+      <table class="sched">
+        <thead><tr>${timeCols}</tr></thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+      <div class="phrases">
+        <div class="ph-title">・スタッフに報告し、確認してもらいましょう！　例）</div>
+        <ul>${REPORT_PHRASES.map(p=>`<li>${p}</li>`).join("")}</ul>
+      </div>
+    </div>
+  `;
+
+  output.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function doPrint(){
+  generate();
+  setTimeout(()=>window.print(), 80);
+}
+
+buildMannerGrid();
+buildDayGrid();
+</script>
+</body>
+</html>
