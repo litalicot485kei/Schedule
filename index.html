@@ -423,8 +423,8 @@ const REPORT_PHRASES = [
 function fullDaySchedule(goalAMHtml, goalPMHtml){
   return `
   <tr><td class="time-col">10:00</td><td colspan="1">朝礼・スパーク・清掃</td><td class="sign-col"></td></tr>
-  <tr class="note-row"><td></td><td colspan="2">目標設定時間　⇒スタッフに取り組み内容とビジネスマナー目標を報告して、確認をしてもらう</td></tr>
-  <tr class="goal-row"><td></td><td colspan="2">
+  <tr class="note-row"><td></td><td>目標設定時間　⇒スタッフに取り組み内容とビジネスマナー目標を報告して、確認をしてもらう</td><td class="sign-col" rowspan="2"><span class="sign-box"></span></td></tr>
+  <tr class="goal-row"><td></td><td>
     <span class="session-label">午前</span>
     <span class="goal-line"><span class="lbl">取り組み：</span>プログラムもしくは個別訓練　（<span class="goal-blank">${goalAMHtml}</span>）</span>
   </td></tr>
@@ -432,8 +432,8 @@ function fullDaySchedule(goalAMHtml, goalPMHtml){
   <tr><td class="time-col">11:40</td><td>日報を書く</td><td class="sign-col"></td></tr>
   <tr><td class="time-col">11:50</td><td>午前終礼</td><td class="sign-col"></td></tr>
   <tr><td class="time-col">13:00</td><td>昼礼</td><td class="sign-col"></td></tr>
-  <tr class="note-row"><td></td><td colspan="2">目標設定時間　⇒スタッフに取り組み内容とビジネスマナー目標を報告して、確認をしてもらう</td></tr>
-  <tr class="goal-row"><td></td><td colspan="2">
+  <tr class="note-row"><td></td><td>目標設定時間　⇒スタッフに取り組み内容とビジネスマナー目標を報告して、確認をしてもらう</td><td class="sign-col" rowspan="2"><span class="sign-box"></span></td></tr>
+  <tr class="goal-row"><td></td><td>
     <span class="session-label">午後</span>
     <span class="goal-line"><span class="lbl">取り組み：</span>プログラムもしくは個別訓練　（<span class="goal-blank">${goalPMHtml}</span>）</span>
   </td></tr>
@@ -446,8 +446,8 @@ function fullDaySchedule(goalAMHtml, goalPMHtml){
 function amOnlySchedule(goalHtml){
   return `
   <tr><td class="time-col">10:00</td><td>朝礼・スパーク・清掃</td><td class="sign-col"></td></tr>
-  <tr class="note-row"><td></td><td colspan="2">目標設定時間　⇒スタッフに取り組み内容とビジネスマナー目標を報告して、確認をしてもらう</td></tr>
-  <tr class="goal-row"><td></td><td colspan="2">
+  <tr class="note-row"><td></td><td>目標設定時間　⇒スタッフに取り組み内容とビジネスマナー目標を報告して、確認をしてもらう</td><td class="sign-col" rowspan="2"><span class="sign-box"></span></td></tr>
+  <tr class="goal-row"><td></td><td>
     <span class="session-label">午前</span>
     <span class="goal-line"><span class="lbl">取り組み：</span>プログラムもしくは個別訓練　（<span class="goal-blank">${goalHtml}</span>）</span>
   </td></tr>
